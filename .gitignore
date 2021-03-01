@@ -2,4 +2,4 @@
 .eslintrc.json
 config.json
 node_modules/
-db/
+db/halloffame.db
