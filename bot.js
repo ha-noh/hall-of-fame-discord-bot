@@ -159,5 +159,10 @@ function containsImageOrVideo(msg) {
 	return Boolean(msg.embeds.length || msg.attachments.size);
 }
 
+function dropTables() {
+	db.run('DROP TABLE posts', [], err => { if(err) console.error(err); });
+	db.run('DROP TABLE reactions', [], err => { if(err) console.error(err); });
+}
+
 require('dotenv').config();
 client.login(process.env.BOT_TOKEN);
