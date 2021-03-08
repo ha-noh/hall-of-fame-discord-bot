@@ -20,7 +20,7 @@ for(const file of commandFiles) {
 }
 
 client.once('ready', () => {
-	console.log(`Pikamee is live! Use '${prefix}' to summon me.`);
+	console.log(`Hof bot is live! Use '${prefix}' to summon me.`);
 });
 
 client.on('message', message => {
@@ -77,7 +77,7 @@ client.on('message', message => {
 	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
 	try {
-		command.execute(message, args);
+		command.execute(message, args, db);
 	}
 	catch(error) {
 		console.error(error);
@@ -106,7 +106,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 	}
 	// the message has now been cached and is fully available
 	if(reaction.message.channel.id !== inputChannelID || !containsImageOrVideo(reaction.message)) return;
-	hallOfFame.execute(client, reaction, user, db);
+	hallOfFame.execute(reaction, user, db);
 });
 
 function insertIntoDb(msg) {

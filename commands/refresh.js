@@ -2,7 +2,7 @@ module.exports = {
 	name: 'refresh',
 	aliases: ['reload'],
 	description: 'Refreshes a command',
-	execute(message, args) {
+	execute(message, args, db) {
 		if(!args.length) return message.channel.send(`You didn't pass any command to refresh, ${message.author}!`);
 
 		const commandName = args[0].toLowerCase();

@@ -1,5 +1,5 @@
 module.exports = {
-	execute(client, reaction, user, db) {
+	execute(reaction, user, db) {
 		const { outputChannelID, reactionThreshold } = require('./config.json');
 		console.log(`Reaction: ${reaction.emoji.name} on ${reaction.message}`);
 		const url = this.getURLFromMsg(reaction.message);
@@ -8,7 +8,7 @@ module.exports = {
 							WHERE url = ?`;
 
 		db.get(selectPost, [url], (err, row) => {
-			if(err) return console.error(err.message);
+			if(err) return console.error(err);
 
 			if(!row) {
 				insertPost()
@@ -110,7 +110,7 @@ module.exports = {
 				if(err) return console.error(err);
 
 				let post;
-				client.channels.fetch(outputChannelID)
+				reaction.client.channels.fetch(outputChannelID)
 					.then(channel => channel.messages.fetch(row.repostid))
 					.then(msg => {
 						post = msg;
@@ -159,12 +159,12 @@ module.exports = {
 
 		async function repost(postRow) {
 			const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries);
-			const userTag = await client.users.fetch(postRow.userid).catch(console.error);
+			const userTag = await reaction.client.users.fetch(postRow.userid).catch(console.error);
 			const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
 			// repost with usertag, original message, and url
 			const repostMsg =
 			`Hall of Fame Entry #${entryNumber}: \nArtist: ${userTag} \nArtwork: ${url} ${showMsgContent}`;
-			client.channels.fetch(outputChannelID)
+			reaction.client.channels.fetch(outputChannelID)
 				.then(channel => channel.send(repostMsg))
 				.then(msg => updatePostRecord(1, 0, msg.id))
 				.catch(console.error);
