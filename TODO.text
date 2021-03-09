@@ -1,0 +1,3 @@
+1. need to update count for every cached reaction
+2. reposting should immediately update emoji reactions
+3. reactions are not inserting properly into the db from halloffame.js, although the count is ticking up

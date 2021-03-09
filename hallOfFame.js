@@ -114,8 +114,8 @@ module.exports = {
 					await reaction.client.channels.fetch(outputChannelID)
 						.then(channel => channel.messages.fetch(row.repostid))
 						.then(msg => {
-							post = msg;
-							msg.reactions.removeAll();
+							post = !msg.reactions ? msg.first() : msg;
+							post.reactions.removeAll();
 						});
 				}
 				catch(err) {
