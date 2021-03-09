@@ -1,3 +1,6 @@
-1. need to update count for every cached reaction
-2. reposting should immediately update emoji reactions
-3. reactions are not inserting properly into the db from halloffame.js, although the count is ticking up
+1. need to update count for every cached reaction ✔
+2. reposting should immediately update emoji reactions ✔
+3. new reactions aren't inserted into the db when the repost has already happened ✔
+4. reaction ticks up on duplicate reactions
+5. when caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached
+	- updating the count column also fails in this scenario

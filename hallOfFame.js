@@ -16,7 +16,8 @@ module.exports = {
 					.then(updatePostRecord(0, 1, null));
 			}
 			else {
-				checkRepostConditions(row);
+				insertReaction(user.id, user.tag, reaction.emoji.name)
+					.then(checkRepostConditions(row));
 			}
 		});
 
@@ -75,12 +76,12 @@ module.exports = {
 			const flag = postRow.flag;
 
 			if(!flag) {
-				await insertReaction(user.id, user.tag, reaction.emoji.name);
-				updatePostRecord(0, 1, null);
-				checkReactionThreshold(postRow);
+				updatePostRecord(0, 1, null)
+					.then(checkReactionThreshold(postRow));
 			}
 			else {
-				updatePostRecord(1, 1, null).then(updateEmoji);
+				updatePostRecord(1, 1, null)
+					.then(updateEmoji);
 			}
 		}
 
@@ -101,6 +102,30 @@ module.exports = {
 				db.all(selectRows, [url], (err, rows) => {
 					if(err) return console.error(err);
 					resolve(rows.length);
+				});
+			});
+		}
+
+		async function repost(postRow) {
+			const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries);
+			const userTag = await reaction.client.users.fetch(postRow.userid).catch(console.error);
+			const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
+			const repostMsg =
+			`Hall of Fame Entry #${entryNumber}: \nArtist: ${userTag} \nArtwork: ${url} ${showMsgContent}`;
+
+			reaction.client.channels.fetch(outputChannelID)
+				.then(channel => channel.send(repostMsg))
+				.then(msg => updatePostRecord(1, 0, msg.id))
+				.then(updateEmoji)
+				.catch(console.error);
+		}
+
+		function countHofEntries() {
+			return new Promise((resolve, reject) => {
+				db.get('SELECT COUNT(*) AS count FROM posts WHERE flag = 1', [], (err, row) => {
+					if(err) return console.error(err);
+					if(row.count) resolve(row.count);
+					else reject('row.count is undefined');
 				});
 			});
 		}
@@ -166,29 +191,6 @@ module.exports = {
 			case 9:
 				return '9️⃣';
 			}
-		}
-
-		async function repost(postRow) {
-			const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries);
-			const userTag = await reaction.client.users.fetch(postRow.userid).catch(console.error);
-			const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
-			const repostMsg =
-			`Hall of Fame Entry #${entryNumber}: \nArtist: ${userTag} \nArtwork: ${url} ${showMsgContent}`;
-
-			reaction.client.channels.fetch(outputChannelID)
-				.then(channel => channel.send(repostMsg))
-				.then(msg => updatePostRecord(1, 0, msg.id))
-				.catch(console.error);
-		}
-
-		function countHofEntries() {
-			return new Promise((resolve, reject) => {
-				db.get('SELECT COUNT(*) AS count FROM posts WHERE flag = 1', [], (err, row) => {
-					if(err) return console.error(err);
-					if(row.count) resolve(row.count);
-					else reject('row.count is undefined');
-				});
-			});
 		}
 	},
 

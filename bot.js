@@ -160,9 +160,18 @@ function containsImageOrVideo(msg) {
 }
 
 function dropTables() {
-	db.run('DROP TABLE posts', [], err => { if(err) console.error(err.message); });
-	db.run('DROP TABLE reactions', [], err => { if(err) console.error(err.message); });
+	return new Promise(resolve => {
+		db.run('DROP TABLE posts', [], err => {
+			if(err) console.error(err.message);
+
+			db.run('DROP TABLE reactions', [], err => {
+				if(err) console.error(err.message);
+				resolve('tables dropped');
+			});
+		});
+	});
 }
+
 
 require('dotenv').config();
 client.login(process.env.BOT_TOKEN);
