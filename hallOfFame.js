@@ -106,28 +106,39 @@ module.exports = {
 		}
 
 		function updateEmoji() {
-			db.get('SELECT count, repostid FROM posts WHERE url = ?', [url], (err, row) => {
+			db.get('SELECT count, repostid FROM posts WHERE url = ?', [url], async (err, row) => {
 				if(err) return console.error(err);
 
 				let post;
-				reaction.client.channels.fetch(outputChannelID)
-					.then(channel => channel.messages.fetch(row.repostid))
-					.then(msg => {
-						post = msg;
-						msg.reactions.removeAll();
-					})
-					.catch(console.error);
-
-				const arr = [];
-
-				while(row.count > 0) {
-					arr.push(Math.floor(row.count % 10));
-					row.count = Math.floor(row.count / 10);
+				try {
+					await reaction.client.channels.fetch(outputChannelID)
+						.then(channel => channel.messages.fetch(row.repostid))
+						.then(msg => {
+							post = msg;
+							msg.reactions.removeAll();
+						});
+				}
+				catch(err) {
+					console.error(err);
 				}
 
-				for(let i = arr.length - 1; i >= 0; i--) {
-					const emoji = getDigitEmoji(arr[i]);
-					post.react(emoji).catch(console.error);
+				const digits = [];
+				let reactionCount = row.count;
+
+				while(reactionCount > 0) {
+					digits.push(Math.floor(reactionCount % 10));
+					reactionCount = Math.floor(reactionCount / 10);
+				}
+
+				// await keyword ensures that the reactions are set in order
+				for(let i = digits.length - 1; i >= 0; i--) {
+					const emoji = getDigitEmoji(digits[i]);
+					try {
+						await post.react(emoji);
+					}
+					catch(err) {
+						console.error(err);
+					}
 				}
 			});
 		}
@@ -161,14 +172,13 @@ module.exports = {
 			const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries);
 			const userTag = await reaction.client.users.fetch(postRow.userid).catch(console.error);
 			const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
-			// repost with usertag, original message, and url
 			const repostMsg =
 			`Hall of Fame Entry #${entryNumber}: \nArtist: ${userTag} \nArtwork: ${url} ${showMsgContent}`;
+
 			reaction.client.channels.fetch(outputChannelID)
 				.then(channel => channel.send(repostMsg))
 				.then(msg => updatePostRecord(1, 0, msg.id))
 				.catch(console.error);
-			// add repost id to posts
 		}
 
 		function countHofEntries() {
