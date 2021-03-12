@@ -10,7 +10,17 @@ const db = new sqlite3.Database('db/halloffame.db', (err) => {
 	if(err) return console.error(err.message);
 	console.log('Connected to the halloffame database.');
 });
-createHofTables();
+
+const args = process.argv.slice(2);
+switch(args[0]) {
+case 'drop':
+	dropTables().then(createHofTables);
+	console.log('Created new tables');
+	break;
+default:
+	if(args[0]) console.log(`'${args[0]}' is not a recognized CLI arg`);
+	createHofTables();
+}
 
 const fs = require('fs');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
