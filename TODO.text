@@ -4,3 +4,4 @@
 4. reaction ticks up on duplicate reactions
 5. when caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached
 	- updating the count column also fails in this scenario
+6. if threshold == 1, the first reaction will not trigger a repost and will not count towards the reaction count

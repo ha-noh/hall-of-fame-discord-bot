@@ -8,7 +8,7 @@ module.exports = {
 							WHERE url = ?`;
 
 		db.get(selectPost, [url], (err, row) => {
-			if(err) return console.error(err);
+			if(err) return console.error(err.message);
 
 			if(!row) {
 				insertPost()
@@ -33,7 +33,7 @@ module.exports = {
 									) VALUES (?, ?, ?, ?, ?)`;
 
 				db.run(insertSQL, values, err => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 
 					resolve(`A row has been inserted into posts with rowid ${this.lastID}`);
 				});
@@ -45,7 +45,7 @@ module.exports = {
 				const values = [url, id, tag, emoji];
 
 				db.run('INSERT INTO reactions VALUES (?, ?, ?, ?)', values, err => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 
 					resolve(`A row has been inserted into reactions with rowid ${this.lastID}`);
 				});
@@ -61,11 +61,11 @@ module.exports = {
 									WHERE url = ?`;
 
 				db.get(selectPost, [url], (err, row) => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 
 					const id = postid ? postid : row.repostid;
 					db.run(updatePost, [flag, row.count + inc, id, url], err => {
-						if(err) return console.error(err);
+						if(err) return console.error(err.message);
 						resolve('A row has been updated with ' + this.changes);
 					});
 				});
@@ -85,12 +85,14 @@ module.exports = {
 			}
 		}
 
-		async function checkReactionThreshold(postRow) {
-			const reactorCount = await getReactorCount().catch(console.error);
-
-			if(reactorCount >= reactionThreshold) {
-				repost(postRow);
-			}
+		function checkReactionThreshold(postRow) {
+			getReactorCount()
+				.then(reactorCount => {
+					if(reactorCount >= reactionThreshold) {
+						repost(postRow);
+					}
+				})
+				.catch(console.error);
 		}
 
 		function getReactorCount() {
@@ -100,30 +102,34 @@ module.exports = {
 									WHERE url = ?`;
 
 				db.all(selectRows, [url], (err, rows) => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 					resolve(rows.length);
 				});
 			});
 		}
 
 		async function repost(postRow) {
-			const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries);
-			const userTag = await reaction.client.users.fetch(postRow.userid).catch(console.error);
-			const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
-			const repostMsg =
-			`Hall of Fame Entry #${entryNumber}: \nArtist: ${userTag} \nArtwork: ${url} ${showMsgContent}`;
+			try {
+				const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries).catch(console.error);
+				const artist = await reaction.client.users.fetch(postRow.userid).catch(console.error);
+				const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
+				const repostMsg = `Hall of Fame Entry #${entryNumber}: \nArtist: ${artist} \nArtwork: ${url} ${showMsgContent}`;
 
-			reaction.client.channels.fetch(outputChannelID)
-				.then(channel => channel.send(repostMsg))
-				.then(msg => updatePostRecord(1, 0, msg.id))
-				.then(updateEmoji)
-				.catch(console.error);
+				reaction.client.channels.fetch(outputChannelID)
+					.then(channel => channel.send(repostMsg))
+					.then(msg => updatePostRecord(1, 0, msg.id))
+					.then(updateEmoji)
+					.catch(console.error);
+			}
+			catch(err) {
+				console.error(err.message);
+			}
 		}
 
 		function countHofEntries() {
 			return new Promise((resolve, reject) => {
 				db.get('SELECT COUNT(*) AS count FROM posts WHERE flag = 1', [], (err, row) => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 					if(row.count) resolve(row.count);
 					else reject('row.count is undefined');
 				});
@@ -132,7 +138,7 @@ module.exports = {
 
 		function updateEmoji() {
 			db.get('SELECT count, repostid FROM posts WHERE url = ?', [url], async (err, row) => {
-				if(err) return console.error(err);
+				if(err) return console.error(err.message);
 
 				let post;
 				try {
@@ -144,7 +150,7 @@ module.exports = {
 						});
 				}
 				catch(err) {
-					console.error(err);
+					console.error(err.message);
 				}
 
 				const digits = [];
@@ -162,7 +168,7 @@ module.exports = {
 						await post.react(emoji);
 					}
 					catch(err) {
-						console.error(err);
+						console.error(err.message);
 					}
 				}
 			});

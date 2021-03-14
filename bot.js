@@ -11,14 +11,14 @@ const db = new sqlite3.Database('db/halloffame.db', (err) => {
 	console.log('Connected to the halloffame database.');
 });
 
-const args = process.argv.slice(2);
-switch(args[0]) {
+const cliArgs = process.argv.slice(2);
+switch(cliArgs[0]) {
 case 'drop':
 	dropTables().then(createHofTables);
-	console.log('Created new tables');
+	console.log('Dropped old tables');
 	break;
 default:
-	if(args[0]) console.log(`'${args[0]}' is not a recognized CLI arg`);
+	if(cliArgs[0]) console.log(`'${cliArgs[0]}' is not a recognized CLI arg`);
 	createHofTables();
 }
 

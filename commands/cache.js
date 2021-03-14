@@ -30,7 +30,7 @@ module.exports = {
 				updateRecord(reactions.first(), counter);
 			}
 			catch(err) {
-				console.error(err);
+				console.error(err.message);
 			}
 			console.log(`Cached ${counter} unique reactions`);
 		}
@@ -70,10 +70,10 @@ module.exports = {
 			const url = hallOfFame.getURLFromMsg(reaction.message);
 
 			db.get('SELECT * FROM posts WHERE url = ?', [url], (err, row) => {
-				if(err) return console.error(err);
+				if(err) return console.error(err.message);
 
 				db.run('UPDATE posts SET count = ? WHERE url = ?', [row.count + counter, url], err => {
-					if(err) return console.error(err);
+					if(err) return console.error(err.message);
 				});
 			});
 		}
