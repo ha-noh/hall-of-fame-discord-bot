@@ -12,7 +12,6 @@ module.exports = {
 
 			if(!row) {
 				insertPost()
-					.then(insertReaction(user.id, user.tag, reaction.emoji.name))
 					.then(() => insertReaction(user.id, user.tag, reaction.emoji.name))
 					.then(inc => updatePostRecord(0, inc, null))
 					.catch(console.error);
