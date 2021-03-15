@@ -43,13 +43,13 @@ module.exports = {
 		}
 
 		function insertReaction(id, tag, emoji) {
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				const values = [url, id, tag, emoji];
 
 				db.run('INSERT INTO reactions VALUES (?, ?, ?, ?)', values, err => {
 					if(err) {
 						console.error(err.message);
-						reject(0);
+						resolve(0);
 					}
 
 					resolve(1);
@@ -71,7 +71,6 @@ module.exports = {
 					const id = postid ? postid : row.repostid;
 
 					db.run(updatePost, [flag, row.count + inc, id, url], err => {
-						console.log('new count is row.count (' + row.count + ') + (' + inc + ')');
 						if(err) return console.error(err.message);
 						resolve('A row has been updated with ' + this.changes);
 					});
@@ -120,7 +119,8 @@ module.exports = {
 				const entryNumber = await updatePostRecord(1, 0, null)
 					.then(countHofEntries)
 					.catch(console.error);
-				const artist = await reaction.client.users.fetch(postRow.userid).catch(console.error);
+				const artist = await reaction.client.users.fetch(postRow.userid)
+					.catch(console.error);
 				const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
 				const repostMsg = `Hall of Fame Entry #${entryNumber}: \nArtist: ${artist} \nArtwork: ${url} ${showMsgContent}`;
 

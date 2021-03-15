@@ -1,6 +1,4 @@
 == BUGS ==
-* when caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached
-	- updating the count column also fails in this scenario
 * The first reaction after a repost won't tick up the reaction count
 
 == FIXED == 
@@ -13,3 +11,5 @@
 	it disappeared when updateNumberReactions() took its parameter from the previous Promise chain link and not a local variable.
 * if threshold == 1, the first reaction will not trigger a repost and it will not count towards the reaction count ✔
 	- decided to not trigger repost on first reaction where threshold == 1
+* when caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached ✔
+	- updating the count column also fails in this scenario ✔
