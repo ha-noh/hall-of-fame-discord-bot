@@ -13,11 +13,14 @@ module.exports = {
 			if(!row) {
 				insertPost()
 					.then(insertReaction(user.id, user.tag, reaction.emoji.name))
-					.then(updatePostRecord(0, 1, null));
+					.then(() => insertReaction(user.id, user.tag, reaction.emoji.name))
+					.then(inc => updatePostRecord(0, inc, null))
+					.catch(console.error);
 			}
 			else {
 				insertReaction(user.id, user.tag, reaction.emoji.name)
-					.then(checkRepostConditions(row));
+					.then(inc => checkRepostConditions(row, inc))
+					.catch(console.error);
 			}
 		});
 
@@ -41,13 +44,16 @@ module.exports = {
 		}
 
 		function insertReaction(id, tag, emoji) {
-			return new Promise(resolve => {
+			return new Promise((resolve, reject) => {
 				const values = [url, id, tag, emoji];
 
 				db.run('INSERT INTO reactions VALUES (?, ?, ?, ?)', values, err => {
-					if(err) return console.error(err.message);
+					if(err) {
+						console.error(err.message);
+						reject(0);
+					}
 
-					resolve(`A row has been inserted into reactions with rowid ${this.lastID}`);
+					resolve(1);
 				});
 			});
 		}
@@ -64,7 +70,9 @@ module.exports = {
 					if(err) return console.error(err.message);
 
 					const id = postid ? postid : row.repostid;
+
 					db.run(updatePost, [flag, row.count + inc, id, url], err => {
+						console.log('new count is row.count (' + row.count + ') + (' + inc + ')');
 						if(err) return console.error(err.message);
 						resolve('A row has been updated with ' + this.changes);
 					});
@@ -72,15 +80,15 @@ module.exports = {
 			});
 		}
 
-		async function checkRepostConditions(postRow) {
+		async function checkRepostConditions(postRow, inc) {
 			const flag = postRow.flag;
 
 			if(!flag) {
-				updatePostRecord(0, 1, null)
+				updatePostRecord(0, inc, null)
 					.then(checkReactionThreshold(postRow));
 			}
 			else {
-				updatePostRecord(1, 1, null)
+				updatePostRecord(1, inc, null)
 					.then(updateEmoji);
 			}
 		}
@@ -110,7 +118,9 @@ module.exports = {
 
 		async function repost(postRow) {
 			try {
-				const entryNumber = await updatePostRecord(1, 0, null).then(countHofEntries).catch(console.error);
+				const entryNumber = await updatePostRecord(1, 0, null)
+					.then(countHofEntries)
+					.catch(console.error);
 				const artist = await reaction.client.users.fetch(postRow.userid).catch(console.error);
 				const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
 				const repostMsg = `Hall of Fame Entry #${entryNumber}: \nArtist: ${artist} \nArtwork: ${url} ${showMsgContent}`;
@@ -127,31 +137,17 @@ module.exports = {
 		}
 
 		function countHofEntries() {
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				db.get('SELECT COUNT(*) AS count FROM posts WHERE flag = 1', [], (err, row) => {
 					if(err) return console.error(err.message);
 					if(row.count) resolve(row.count);
-					else reject('row.count is undefined');
 				});
 			});
 		}
 
 		function updateEmoji() {
-			db.get('SELECT count, repostid FROM posts WHERE url = ?', [url], async (err, row) => {
+			db.get('SELECT count, repostid FROM posts WHERE url = ?', [url], (err, row) => {
 				if(err) return console.error(err.message);
-
-				let post;
-				try {
-					await reaction.client.channels.fetch(outputChannelID)
-						.then(channel => channel.messages.fetch(row.repostid))
-						.then(msg => {
-							post = !msg.reactions ? msg.first() : msg;
-							post.reactions.removeAll();
-						});
-				}
-				catch(err) {
-					console.error(err.message);
-				}
 
 				const digits = [];
 				let reactionCount = row.count;
@@ -161,17 +157,29 @@ module.exports = {
 					reactionCount = Math.floor(reactionCount / 10);
 				}
 
-				// await keyword ensures that the reactions are set in order
+				reaction.client.channels.fetch(outputChannelID)
+					.then(channel => channel.messages.fetch(row.repostid))
+					.then(msg => {
+						const post = !msg.reactions ? msg.first() : msg;
+						post.reactions.removeAll();
+						return post;
+					})
+					.then(post => updateNumberReactions(digits, post))
+					.catch(console.error);
+			});
+		}
+
+		async function updateNumberReactions(digits, post) {
+			try {
 				for(let i = digits.length - 1; i >= 0; i--) {
 					const emoji = getDigitEmoji(digits[i]);
-					try {
-						await post.react(emoji);
-					}
-					catch(err) {
-						console.error(err.message);
-					}
+					// await keyword ensures that the reactions are set in order
+					await post.react(emoji);
 				}
-			});
+			}
+			catch(err) {
+				console.error(err.message);
+			}
 		}
 
 		function getDigitEmoji(num) {
