@@ -2,14 +2,16 @@
 * The first reaction after a repost won't tick up the reaction count
 
 == FIXED == 
-* need to update count for every cached reaction ✔
-* reposting should immediately update emoji reactions ✔
-* new reactions aren't inserted into the db when the repost has already happened ✔
-* reaction count ticks up on duplicate reactions ✔
+* Need to update count for every cached reaction ✔
+* Reposting should immediately update emoji reactions ✔
+* New reactions aren't inserted into the db when the repost has already happened ✔
+* Reaction count ticks up on duplicate reactions ✔
 	- insertReaction() now returns a Promise<int> to determine if the count should tick up or not;
 	this introduced a bug where reactions just wouldn't tick the count up at all, but for some reason 
 	it disappeared when updateNumberReactions() took its parameter from the previous Promise chain link and not a local variable.
-* if threshold == 1, the first reaction will not trigger a repost and it will not count towards the reaction count ✔
+* If threshold == 1, the first reaction will not trigger a repost and it will not count towards the reaction count ✔
 	- decided to not trigger repost on first reaction where threshold == 1
-* when caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached ✔
+* When caching reactions, if a cached reaction exists then old reactions of that same emoji won't be cached ✔
 	- updating the count column also fails in this scenario ✔
+	- the issue was with the for...of loop iterating through users.values(). 
+	For some reason the users collection would not contain all of its entries if converted to an array or if called using .values().

@@ -4,7 +4,9 @@ module.exports = {
 	aliases: ['commands'],
 	description: 'List all available commands or info about a specific command',
 	usage: '<command name>',
-	cooldown: 5,
+	args: false,
+	cooldown: 3,
+	guildOnly: false,
 	execute(message, args, db) {
 		const data = [];
 		const { commands } = message.client;

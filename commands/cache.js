@@ -1,11 +1,11 @@
 module.exports = {
 	name: 'cache',
-	aliases: 'store',
-	description: 'retrieve the reactions on a specific message and record them in the db',
+	aliases: ['store'],
+	description: 'retrieve the reactions on a specific message and record them in the database',
 	usage: '<message id>',
 	args: true,
 	cooldown: 2,
-	guildOnly: false,
+	guildOnly: true,
 	execute(message, args, db) {
 		const { inputChannelID } = require('../config.json');
 		const hallOfFame = require('../hallOfFame.js');
