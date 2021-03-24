@@ -120,7 +120,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 function insertIntoDb(msg) {
-	const values = [hallOfFame.getURLFromMsg(msg), 0, 0, msg.author.id, msg.author.tag];
+	const url = hallOfFame.getURLFromMsg(msg);
+	const values = [url, 0, 0, msg.author.id, msg.author.tag];
 	const insertSQL = `INSERT INTO posts (
 							url, 
 							flag, 
@@ -131,7 +132,7 @@ function insertIntoDb(msg) {
 
 	db.run(insertSQL, values, err => {
 		if(err) return console.error(err.message);
-		console.log(`A row has been inserted with rowid ${this.lastID}`);
+		console.log(`Added ${url} to the database`);
 	});
 }
 
