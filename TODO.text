@@ -1,3 +1,9 @@
+== Features ==
+* Delete command to remove db entries for a given url
+	- should only be usable by users with privileges, or should take a password as an arg
+* Blacklist command to prevent reactions on a post from triggering a repost
+	- same as above, needs to have limited access
+
 == BUGS ==
 * The first reaction after a repost won't tick up the reaction count
 

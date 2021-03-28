@@ -15,6 +15,7 @@ This bot takes popular image posts from a channel (which are evaluated based on 
 			"inputChannelID": "the channel id of the channel you're watching for reactions",
 			"outputChannelID": "the channel id of the channel you want the reposted media to go",
 			"reactionThreshold": "the number of reactions you want to trigger a repost"
+			"commandAccessKey": "a password that you will need to enter for limited access commands"
 		}
 		```
 	- You can find the id of a channel by right clicking a channel. Both the input and output channels should be text channels.
