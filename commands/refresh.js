@@ -5,7 +5,7 @@ module.exports = {
 	usage: '<command name>',
 	args: true,
 	cooldown: 3,
-	guildOnly: true,
+	guildOnly: false,
 	execute(message, args, db) {
 		if(!args.length) return;
 
