@@ -6,6 +6,7 @@
 
 == BUGS ==
 * The first reaction after a repost won't tick up the reaction count
+* Delete does not cascade down; as a workaround the delete command currently uses two separate delete statements
 
 == FIXED == 
 * Need to update count for every cached reaction ✔

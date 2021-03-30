@@ -95,6 +95,7 @@ module.exports = {
 
 					db.run('UPDATE posts SET count = ? WHERE url = ?', [counter, url], err => {
 						if(err) return console.error(err.message);
+
 						resolve('record updated');
 					});
 				});
