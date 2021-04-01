@@ -12,8 +12,8 @@ module.exports = {
 			return message.reply('You didn\'t provide the correct access key!');
 		}
 
-		deleteRows(args[0], 'posts')
-			.then(() => deleteRows(args[0], 'reactions'))
+		deleteRows(args[0], true)
+			.then(() => deleteRows(args[0], false))
 			.then(() => {
 				console.log(`Deleted rows for ${args[0]}`);
 				message.reply('Successfully deleted entries from the db!');
@@ -21,10 +21,10 @@ module.exports = {
 			.catch(console.error);
 
 
-		function deleteRows(key, table) {
+		function deleteRows(key, isPosts) {
 			return new Promise(resolve => {
 				const isUrl = key.includes('/') ? true : false;
-				const sql = `DELETE FROM ${table} WHERE ${isUrl ? 'url' : 'repostid'} = ?`;
+				const sql = `DELETE FROM ${isPosts ? 'posts' : 'reactions'} WHERE ${isUrl ? 'url' : 'repostid'} = ?`;
 
 				db.run(sql, [key], err => {
 					if(err) return console.error(err.message);
