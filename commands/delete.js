@@ -12,30 +12,21 @@ module.exports = {
 			return message.reply('You didn\'t provide the correct access key!');
 		}
 
-		if(args[0].includes('/')) {
-			deleteRows(args[0], null, 'posts')
-				.then(() => deleteRows(args[0], null, 'reactions'))
-				.then(() => {
-					console.log(`Deleted rows for ${args[0]}`);
-					message.reply('Successfully deleted entries from the db!');
-				})
-				.catch(console.error);
-		}
-		else {
-			deleteRows(null, args[0], 'posts')
-				.then(() => deleteRows(null, args[0], 'reactions'))
-				.then(() => {
-					console.log(`Deleted rows for ${args[0]}`);
-					message.reply('Successfully deleted entries from the db!');
-				})
-				.catch(console.error);
-		}
+		deleteRows(args[0], 'posts')
+			.then(() => deleteRows(args[0], 'reactions'))
+			.then(() => {
+				console.log(`Deleted rows for ${args[0]}`);
+				message.reply('Successfully deleted entries from the db!');
+			})
+			.catch(console.error);
 
-		function deleteRows(url, msgID, table) {
+
+		function deleteRows(key, table) {
 			return new Promise(resolve => {
-				const sql = `DELETE FROM ${table} WHERE ${url ? 'url' : 'repostid'} = ?`;
+				const isUrl = key.includes('/') ? true : false;
+				const sql = `DELETE FROM ${table} WHERE ${isUrl ? 'url' : 'repostid'} = ?`;
 
-				db.run(sql, url ? url : msgID, err => {
+				db.run(sql, [key], err => {
 					if(err) return console.error(err.message);
 
 					resolve('row deleted');
