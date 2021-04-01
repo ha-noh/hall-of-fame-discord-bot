@@ -17,6 +17,9 @@ case 'drop':
 	dropTables().then(createHofTables);
 	console.log('Dropped old tables');
 	break;
+case 'alter':
+	alterTables();
+	break;
 default:
 	if(cliArgs[0]) console.log(`'${cliArgs[0]}' is not a recognized CLI arg`);
 	createHofTables();
@@ -124,7 +127,7 @@ function insertIntoDb(msg) {
 	const values = [url, 0, 0, msg.author.id, msg.author.tag];
 	const insertSQL = `INSERT INTO posts (
 							url, 
-							flag, 
+							repost, 
 							count, 
 							userid, 
 							usertag
@@ -139,11 +142,12 @@ function insertIntoDb(msg) {
 function createHofTables() {
 	const postsSQL = `CREATE TABLE IF NOT EXISTS posts (
 							url TEXT PRIMARY KEY,
-							flag INTEGER NOT NULL,
+							repost INTEGER NOT NULL,
 							count INTEGER NOT NULL,
 							userid TEXT NOT NULL,
 							usertag TEXT NOT NULL,
-							repostid TEXT
+							repostid TEXT,
+							blacklist INTEGER
 						)`;
 	const reactionsSQL = `CREATE TABLE IF NOT EXISTS reactions (
 								url TEXT NOT NULL,
@@ -183,6 +187,21 @@ function dropTables() {
 	});
 }
 
+function alterTables() {
+	return new Promise(resolve => {
+		db.run('ALTER TABLE posts ADD COLUMN blacklist INTEGER', [], err => {
+			if(err) return console.error(err.message);
 
+			console.log('Added blacklist column');
+
+			db.run('ALTER TABLE posts RENAME COLUMN flag TO repost', [], err => {
+				if(err) return console.error(err.message);
+
+				console.log('Renamed flag column')
+				resolve('Table altered successfully');
+			});
+		});
+	});
+}
 require('dotenv').config();
 client.login(process.env.BOT_TOKEN);

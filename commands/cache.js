@@ -46,7 +46,7 @@ module.exports = {
 			return new Promise(resolve => {
 				const sql = `INSERT INTO posts (
 								url, 
-								flag, 
+								repost, 
 								count, 
 								userid, 
 								usertag

@@ -12,6 +12,15 @@ module.exports = {
 			return message.reply('You didn\'t provide the correct access key!');
 		}
 
-		message.reply('success');
+		if(args[0].includes('/')) {
+			return;
+		}
+		else {
+			return;
+		}
+
+		function updateRow(url, msgID, table) {
+			return { url, msgID, table };
+		}
 	},
 };

@@ -28,7 +28,7 @@ module.exports = {
 				const values = [url, 0, 0, reaction.message.author.id, reaction.message.author.tag];
 				const insertSQL = `INSERT INTO posts (
 										url, 
-										flag, 
+										repost, 
 										count, 
 										userid, 
 										usertag
@@ -60,7 +60,7 @@ module.exports = {
 		function updatePostRecord(flag, inc, postid) {
 			return new Promise(resolve => {
 				const updatePost = `UPDATE posts
-									SET flag = ?,
+									SET repost = ?,
 										count = ?,
 										repostid = ?
 									WHERE url = ?`;
@@ -79,7 +79,7 @@ module.exports = {
 		}
 
 		async function checkRepostConditions(postRow, inc) {
-			const flag = postRow.flag;
+			const flag = postRow.repost;
 
 			if(!flag) {
 				updatePostRecord(0, inc, null)
@@ -137,7 +137,7 @@ module.exports = {
 
 		function countHofEntries() {
 			return new Promise((resolve) => {
-				db.get('SELECT COUNT(*) AS count FROM posts WHERE flag = 1', [], (err, row) => {
+				db.get('SELECT COUNT(*) AS count FROM posts WHERE repost = 1', [], (err, row) => {
 					if(err) return console.error(err.message);
 					if(row.count) resolve(row.count);
 				});
