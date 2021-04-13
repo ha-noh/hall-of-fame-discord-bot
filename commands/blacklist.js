@@ -2,7 +2,7 @@ const { commandAccessKey } = require('../config.json');
 module.exports = {
 	name: 'blacklist',
 	aliases: ['block', 'stop', 'flag'],
-	description: 'enable or disable reposts for a given url - requires a password for use.',
+	description: 'blacklist a url from reposting or restore a blacklisted url; provide \'true\' to disable reposts, \'false\' to enable. Requires a password for use.',
 	usage: '<media url> <true || false> <access key>',
 	args: true,
 	cooldown: 3,
@@ -12,17 +12,19 @@ module.exports = {
 			return message.reply('You didn\'t provide the correct access key!');
 		}
 
-		if(args[1].toLowerCase() == 'true') {
-			updateRow(args[0], 1)
+		const booleanString = args[1].toLowerCase();
+
+		if(booleanString === 'true' || booleanString === 'false') {
+			const flag = booleanString === 'true' ? 1 : 0;
+
+			updateRow(args[0], flag)
 				.then(() => {
-					message.reply('Url has been blaclisted');
+					message.reply(`Url has been ${flag ? 'blacklisted' : 'whitelisted'}.`);
 				})
 				.catch(err => {
-					message.reply('Blacklist operation failed')
+					console.error(err);
+					message.reply('Blacklist operation failed.');
 				});
-		}
-		else if(args[1].toLowerCase() == 'false') {
-			updateRow(args[0], 0);
 		}
 		else {
 			return message.reply('Your second arg has to be \'true\' or \'false\'');
