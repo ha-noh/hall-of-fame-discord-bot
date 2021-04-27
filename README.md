@@ -18,3 +18,4 @@ This bot takes popular image posts from a channel (which are evaluated based on 
 	- You can find the id of a channel by right clicking a channel. Both the input and output channels should be text channels.
 3. Spin up the bot by going to the project directory in your CLI and using the command `node bot.js`. This can be followed with optional text arguments, which include:
 	- `drop` : This will delete the existing `posts` and `reactions` tables on startup and create empty tables to replace them. This can't be undone!
+	- `alter` : This will update your existing tables with any necessary alterations present in `alterTables()` (this function and its changes can be found in `bot.js`).
