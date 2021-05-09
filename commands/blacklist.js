@@ -3,7 +3,7 @@ module.exports = {
 	name: 'blacklist',
 	aliases: ['block', 'stop', 'flag'],
 	description: 'blacklist a url from reposting or restore a blacklisted url; provide \'true\' to disable reposts, \'false\' to enable. Requires a password for use.',
-	usage: '<media url> <true || false> <access key>',
+	usage: '<media url> <on || off> <access key>',
 	args: true,
 	cooldown: 3,
 	guildOnly: false,
@@ -14,8 +14,8 @@ module.exports = {
 
 		const booleanString = args[1].toLowerCase();
 
-		if(booleanString === 'true' || booleanString === 'false') {
-			const flag = booleanString === 'true' ? 1 : 0;
+		if(booleanString === 'on' || booleanString === 'off') {
+			const flag = booleanString === 'on' ? 1 : 0;
 
 			updateRow(args[0], flag)
 				.then(() => {
@@ -27,7 +27,7 @@ module.exports = {
 				});
 		}
 		else {
-			return message.reply('Your second arg has to be \'true\' or \'false\'');
+			return message.reply('Your second arg has to be \'on\' or \'off\'');
 		}
 
 		function updateRow(url, blacklistFlag) {

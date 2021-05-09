@@ -85,7 +85,12 @@ module.exports = {
 			if(!repostFlag) {
 				updatePostRecord(0, inc, null)
 					.then(() => {
-						if(!blacklistFlag) checkReactionThreshold(row);
+						if(!blacklistFlag) {
+							checkReactionThreshold(row);
+						}
+						else {
+							console.log(`${url} is blacklisted so a repost was prevented`);
+						}
 					});
 			}
 			else {
@@ -129,7 +134,10 @@ module.exports = {
 
 				reaction.client.channels.fetch(outputChannelID)
 					.then(channel => channel.send(repostMsg))
-					.then(msg => updatePostRecord(1, 0, msg.id))
+					.then(msg => {
+						console.log('reposted ' + url);
+						updatePostRecord(1, 0, msg.id);
+					})
 					.then(updateEmoji)
 					.catch(console.error);
 			}
