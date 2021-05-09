@@ -78,12 +78,15 @@ module.exports = {
 			});
 		}
 
-		async function checkRepostConditions(postRow, inc) {
-			const flag = postRow.repost;
+		async function checkRepostConditions(row, inc) {
+			const repostFlag = row.repost;
+			const blacklistFlag = row.blacklist;
 
-			if(!flag) {
+			if(!repostFlag) {
 				updatePostRecord(0, inc, null)
-					.then(checkReactionThreshold(postRow));
+					.then(() => {
+						if(!blacklistFlag) checkReactionThreshold(row);
+					});
 			}
 			else {
 				updatePostRecord(1, inc, null)
@@ -91,11 +94,11 @@ module.exports = {
 			}
 		}
 
-		function checkReactionThreshold(postRow) {
+		function checkReactionThreshold(row) {
 			getReactorCount()
 				.then(reactorCount => {
 					if(reactorCount >= reactionThreshold) {
-						repost(postRow);
+						repost(row);
 					}
 				})
 				.catch(console.error);
@@ -114,12 +117,12 @@ module.exports = {
 			});
 		}
 
-		async function repost(postRow) {
+		async function repost(row) {
 			try {
 				const entryNumber = await updatePostRecord(1, 0, null)
 					.then(countHofEntries)
 					.catch(console.error);
-				const artist = await reaction.client.users.fetch(postRow.userid)
+				const artist = await reaction.client.users.fetch(row.userid)
 					.catch(console.error);
 				const showMsgContent = reaction.message.content ? `\`\`\`${reaction.message.content}\`\`\`` : '';
 				const repostMsg = `Hall of Fame Entry #${entryNumber}: \nArtist: ${artist} \nArtwork: ${url} ${showMsgContent}`;
