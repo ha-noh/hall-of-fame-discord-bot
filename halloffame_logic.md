@@ -42,12 +42,13 @@
 # Corner Cases/Issues:
 1. ~~As previously mentioned, because the Post's embedded url is used as its key, duplicate urls within the Input channel can cause issues.~~
 2. ~~Any reactions removed from a Post will not be included in the Count if the bot reboots - the Count will be built only from the reactions on the Post at the bot's startup.~~
-3. The reaction listener needs to wait for the Collection to be constructed before executing
-4. What happens when a post is deleted from the Output channel? As of now this would prevent any future reactions on the Input post from having any effect.
+3. ~~The reaction listener needs to wait for the Collection to be constructed before executing~~
+4. What happens when a post is deleted from the Output channel? ~~As of now this would prevent any future reactions on the Input post from having any effect.~~
+	- With a db implementation, deleting a post means the next reaction would trigger another repost. The blacklist flag can prevent this behavior.
 5. ~~A db would be a better way to store the Collection and List contents; more performant and persistent - fetching messages to build the Collection is limited because only a maximum of 50 messages can be fetched.~~
 6. Due to its interior logic, a Threshold of 1 won't always trigger a repost off its first reaction. To be more specific: the first reaction on a Post not recorded in the DB will never check the Repost conditions; subsequent reactions, even from the same Reactor, will.
 
-The marked issues are fixed by implementing a database over a non-permanent data structure.
+Issues (1-5) have been addressed by replacing the collection object with a sql database.
 
 ## User Fetch Issue
 ~~The user parameter is undefined in the `messagereactionAdd` event listener UNTIL a new post is made while the bot is awake - 
