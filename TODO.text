@@ -1,14 +1,10 @@
 == Features ==
-* Delete command to remove db entries for a given url
-	- should only be usable by users with privileges, or should take a password as an arg
-* Blacklist command to prevent reactions on a post from triggering a repost
-	- same as above, needs to have limited access
 
 == BUGS ==
 * The first reaction after a repost won't tick up the reaction count
 * Delete does not cascade down; as a workaround the delete command currently uses two separate delete statements
 
-== FIXED == 
+== FIXED/ADDED == 
 * Need to update count for every cached reaction ✔
 * Reposting should immediately update emoji reactions ✔
 * New reactions aren't inserted into the db when the repost has already happened ✔
@@ -22,3 +18,7 @@
 	- updating the count column also fails in this scenario ✔
 	- the issue was with the for...of loop iterating through users.values(). 
 	For some reason the users collection would not contain all of its entries if converted to an array or if called using .values().
+* Delete command to remove db entries for a given url ✔
+	- should only be usable by users with privileges, or should take a password as an arg
+* Blacklist command to prevent reactions on a post from triggering a repost ✔
+	- same as above, needs to have limited access
