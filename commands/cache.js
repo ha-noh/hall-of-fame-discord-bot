@@ -65,7 +65,7 @@ module.exports = {
 		}
 
 		function insertReaction(reaction, user) {
-			return new Promise((resolve) => {
+			return new Promise(resolve => {
 				const values = [hallOfFame.getURLFromMsg(reaction.message), user.id, user.tag, reaction.emoji.name];
 
 				db.run('INSERT INTO reactions VALUES (?, ?, ?, ?)', values, err => {
@@ -90,7 +90,7 @@ module.exports = {
 			return new Promise(resolve => {
 				const url = hallOfFame.getURLFromMsg(reaction.message);
 
-				db.get('SELECT * FROM posts WHERE url = ?', [url], (err, row) => {
+				db.get('SELECT * FROM posts WHERE url = ?', [url], err => {
 					if(err) return console.error(err.message);
 
 					db.run('UPDATE posts SET count = ? WHERE url = ?', [counter, url], err => {

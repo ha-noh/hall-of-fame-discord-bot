@@ -66,7 +66,6 @@ client.on('message', message => {
 		return message.channel.send(reply);
 	}
 
-	// set a cooldown collection for a command if it doesn't already exist
 	if(!cooldowns.has(command.name)) {
 		cooldowns.set(command.name, new Discord.Collection());
 	}
@@ -86,7 +85,6 @@ client.on('message', message => {
 	}
 
 	timestamps.set(message.author.id, now);
-	// automatically remove the user cooldown once it expires
 	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
 	try {
@@ -117,10 +115,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
 			return console.error('Something went wrong when fetching the user: ', error);
 		}
 	}
-	// the message has now been cached and is fully available
+
 	if(reaction.message.channel.id !== inputChannelID || !containsImageOrVideo(reaction.message)) return;
 	hallOfFame.execute(reaction, user, db);
 });
+
+require('dotenv').config();
+client.login(process.env.BOT_TOKEN);
 
 function insertIntoDb(msg) {
 	const url = hallOfFame.getURLFromMsg(msg);
@@ -168,8 +169,9 @@ function createHofTables() {
 		if(err) return console.error(err.message);
 	});
 }
-// embeds and attachments properties will never be null, even if they're empty
-// the image preview created by attachments are not considered embeds
+
+// Embeds and attachments properties will never be null, even if they're empty
+// Additionally, the image preview created by attachments are not considered embeds
 function containsImageOrVideo(msg) {
 	return Boolean(msg.embeds.length || msg.attachments.size);
 }
@@ -203,5 +205,3 @@ function alterTables() {
 		});
 	});
 }
-require('dotenv').config();
-client.login(process.env.BOT_TOKEN);
